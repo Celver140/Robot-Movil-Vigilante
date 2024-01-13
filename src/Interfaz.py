@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
 
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QListWidget, QRadioButton
 from PyQt5.QtGui import QPalette, QColor, QPixmap, QIcon
@@ -16,12 +17,18 @@ from geometry_msgs.msg import Point, PoseArray, Pose
 from sensor_msgs.msg import Image
 from visualization_msgs.msg import Marker
 
-import os
+# ------------------------------------------------------------------------------------------------
+# TOPICS Y VARIABLES GLOBALES
+# ------------------------------------------------------------------------------------------------
 
 TOPIC_IMG= '/camera/rgb/image_raw'
 TOPIC_WAYPOINT= '/waypoints'
 TOPIC_ESTADOS= '/estados'
 TOPIC_ALARMA= '/alarma'
+
+# ------------------------------------------------------------------------------------------------
+# Interfaz
+# ------------------------------------------------------------------------------------------------
 
 class DarkThemeApp(QWidget):
     def __init__(self):
@@ -29,13 +36,12 @@ class DarkThemeApp(QWidget):
 
         self.init_ui()
         rospy.init_node("Interfaz")
-        # waypoint
-        rospy.Subscriber(TOPIC_WAYPOINT, PoseArray, self.waypoint_callback)
+        
+        rospy.Subscriber(TOPIC_WAYPOINT, PoseArray, self.waypoint_callback) #Suscriptores para la recepción de cambios en la máquina de estados
         rospy.Subscriber(TOPIC_ESTADOS, String, self.sel_menu)
 
-        self.pub_alarm = rospy.Publisher(TOPIC_ALARMA, Bool, queue_size=10)
-
-        self.bridge = cv_bridge.CvBridge()
+        self.pub_alarm = rospy.Publisher(TOPIC_ALARMA, Bool, queue_size=10) # Publicador para determinar si el robot debe tener la alarma preparada
+        self.bridge = cv_bridge.CvBridge()  # Necesario para transformar de mensaje de ros a imagen
 
 
     def init_ui(self):
@@ -281,23 +287,6 @@ class DarkThemeApp(QWidget):
 
         self.show()
 
-    def on_button_mostrar_seleccionado_click(self):
-        selected_item = self.list_widget.currentItem()
-        if selected_item is not None:
-            print(f'Elemento Seleccionado: {selected_item.text()}')
-            self.list_trayect.addItem(str(selected_item.text()))
-
-        else:
-            print('Ningún elemento seleccionado.')
-
-    def on_button_borrar_trayect_click(self):
-        selected_item = self.list_trayect.currentItem()
-        if selected_item is not None:
-            print(f'Borrando trayecto seleccionado: {selected_item.text()}')
-            self.list_trayect.takeItem(self.list_trayect.row(selected_item))
-        else:
-            print('Ningún trayecto seleccionado.')
-
         # Imprimir todos los elementos de list_trayect
         elementos_trayect = [self.list_trayect.item(i).text() for i in range(self.list_trayect.count())]
         print("Elementos en list_trayect:", elementos_trayect)
@@ -316,7 +305,7 @@ class DarkThemeApp(QWidget):
         for elemento in self.mi_lista:
             self.list_widget.addItem(str(elemento))
 
-    # Para que actualice la eleccion del menu, cuando se cambia desde fuera
+    # Para que actualice la eleccion del menu
     def sel_menu(self, msg):
         print(msg.data)
         if msg.data == "reposo":
@@ -362,20 +351,19 @@ class DarkThemeApp(QWidget):
         # Cambiar el texto del botón según el estado
         if self.switch_button.isChecked():
             self.switch_button.setText('Activado')
-            self.alarma_preparada = True
+            self.alarma_preparada = True    # Transmitir a la máquina de estados que si detecta un intruso debe activar la alarma
             self.pub_alarm.publish(True)
         else:
             self.switch_button.setText('Desactivado')
-            self.alarma_preparada = False
+            self.alarma_preparada = False   # Transmitir a la máquina de estados que debe apagar la alarma y no atenderla
             self.alarma = False
             self.image_label.clear()
             self.led_label.setStyleSheet("background-color:black;font : 20px Arial;color:black;")
             self.pub_alarm.publish(False)
 
 
-
-
 if __name__ == '__main__':
+
     app = QApplication(sys.argv)
     dark_app = DarkThemeApp()
     sys.exit(app.exec_())
