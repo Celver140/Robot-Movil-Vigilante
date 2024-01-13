@@ -87,10 +87,12 @@ class WristDetector:
                         self.pub.publish(int_array_msg)       
 
                     landmark_list = self.calc_landmark_list(frame, handLandmarks)
-                    landmark_coord = self.pre_process_landmark(landmark_list)
-                    landmark_dist = self.landmark_distance(landmark_list)
+                    landmark_coord = self.pre_process_landmark(landmark_list)   # Procesamiento de landmarks para obtención de coordenadas respecto a la muñeca
+                    landmark_dist = self.landmark_distance(landmark_list)       # Procesamiento de landmarks para obtención de la distancia
                     prediction = self.model.predict([landmark_coord])
-                    Gesto = CLASSNAMES[np.argmax(prediction)]
+
+                    # Obtención del gesto
+                    Gesto = CLASSNAMES[np.argmax(prediction)]   
                     print(Gesto)
                     self.pub_gesture.publish(Gesto)
 
@@ -107,19 +109,22 @@ class WristDetector:
                         detected += 1
 
                     self.pub_fingercount.publish(detected)  #publicar la cuenta de dedos
-            else:
+            else:   # En caso de que no se detecte ninguna mano
                 self.pub_gesture.publish('none')
                 self.pub_fingercount.publish(0)
 
         cv2.imshow("Gesture Detector", frame)
         cv2.waitKey(3)
 
-    def calc_landmark_list(self, image, landmarks):
+    # ------------------------------------------------------------------------------------------------
+    # PROCESAMIENTO DE LANDMARKS
+    # ------------------------------------------------------------------------------------------------
+
+    def calc_landmark_list(self, image, landmarks):     # Transformación de los landmarks en una lista
         image_width, image_height = image.shape[1], image.shape[0]
 
         landmark_point = []
 
-        # Keypoint
         for _, landmark in enumerate(landmarks.landmark):
             landmark_x = min(int(landmark.x * image_width), image_width - 1)
             landmark_y = min(int(landmark.y * image_height), image_height - 1)
@@ -129,10 +134,10 @@ class WristDetector:
 
         return landmark_point
 
-    def pre_process_landmark(self, landmark_list):
+    def pre_process_landmark(self, landmark_list):      # Preprocesamiento de los landmarks, coordenadas relativas a la muñeca
         temp_landmark_list = copy.deepcopy(landmark_list)
 
-        # Convert to relative coordinates
+        # Convertir en coordenadas relativas
         base_x, base_y = 0, 0
         for index, landmark_point in enumerate(temp_landmark_list):
             if index == 0:
@@ -141,13 +146,13 @@ class WristDetector:
             temp_landmark_list[index][0] = temp_landmark_list[index][0] - base_x
             temp_landmark_list[index][1] = temp_landmark_list[index][1] - base_y
 
-        # Convert to a one-dimensional list
+        # Convertir en una lista unidimensional
         temp_landmark_list = list(
             itertools.chain.from_iterable(temp_landmark_list))
 
         return temp_landmark_list
         
-    def calculate_bounding_box(self, handLandmarks, frameWidth, frameHeight):
+    def calculate_bounding_box(self, handLandmarks, frameWidth, frameHeight):   # Calculo del bounding box para conocer la cercanía a la camara de la mano
         x_min = min([landmark.x for landmark in handLandmarks.landmark])
         x_max = max([landmark.x for landmark in handLandmarks.landmark])
         y_min = min([landmark.y for landmark in handLandmarks.landmark])
@@ -158,7 +163,7 @@ class WristDetector:
     def landmark_distance(self, landmark_list):
         temp_landmark_list = copy.deepcopy(landmark_list)
 
-        # Convert to relative coordinates
+        # Calculo de la distancia 
         base_x, base_y = 0, 0
         for index, landmark_point in enumerate(temp_landmark_list):
             if index == 0:
@@ -167,7 +172,7 @@ class WristDetector:
             temp_landmark_list[index] = math.sqrt(pow(temp_landmark_list[index][0] - base_x,2) + pow(temp_landmark_list[index][1] - base_y,2))
         
 
-        # Normalization
+        # Normalización
         max_value = max(list(map(abs, temp_landmark_list)))
 
         def normalize_(n):

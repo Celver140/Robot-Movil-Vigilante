@@ -20,16 +20,16 @@ frame = None
 class WebcamPublisher:
     def __init__(self):
         rospy.init_node('webcam_publisher', anonymous=True)
-        self.bridge = cv_bridge.CvBridge()
-        self.image_pub = rospy.Publisher(TOPIC_IMG, Image, queue_size=10)
-        self.capture = cv2.VideoCapture(0)  # 0 is typically the default webcam
+        self.bridge = cv_bridge.CvBridge()  # Necesario para la transformación de mensaje de ROS a imagen
+        self.image_pub = rospy.Publisher(TOPIC_IMG, Image, queue_size=10)   # Publicador para transmitir la imagen
+        self.capture = cv2.VideoCapture(0)  # 0 para la webcam por defecto
 
     def publish_frame(self):
-        ret, frame = self.capture.read()
+        ret, frame = self.capture.read()    # Obtención de la imagen
         if ret:
             try:
-                ros_image = self.bridge.cv2_to_imgmsg(frame, "bgr8")
-                self.image_pub.publish(ros_image)
+                ros_image = self.bridge.cv2_to_imgmsg(frame, "bgr8")    # Transformar de mensaje a imagen
+                self.image_pub.publish(ros_image)                       # Publicar en nodo correspondiente
             except cv_bridge.CvBridgeError as e:
                 rospy.logerr("CvBridge Error: {0}".format(e))
 
