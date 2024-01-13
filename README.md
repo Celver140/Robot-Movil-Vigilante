@@ -27,3 +27,7 @@ Instrucciones de lanzamiento:
         >> roslaunch robot_movil_vigilancia laboratorio_simulation.launch      # máquina de estados, interfaz, Rviz
         >> python3.10 Detector_Gestos.py                                       # detección de los gestos, muñeca y cuenta de dedos
         >> python3.10 Detector_Personas.py                                     # detección de personas para detectar intrusos
+
+  Entrenar el modelo: 
+    En ocasiones se ha visto necesario reentrenar el modelo en cada dispositivo a utilizar (actualizar modelo.keras). Para reentrenarlo: 
+      >> python3.10 EntrenarModelo.py
