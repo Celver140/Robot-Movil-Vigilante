@@ -30,7 +30,7 @@ TOPIC_IMG= '/camera/rgb/image_raw'
 TOPIC_WRIST = '/wrist_position'
 TOPIC_GESTURE = '/gestos'
 TOPIC_FINGERCOUNT = '/num_waypoint'
-CLASSNAMES = ['puño', 'stop', 'seguir', 'waypoint', 'okay', 'cancel']
+CLASSNAMES = ['puño', 'palma', 'seguir', 'waypoint', 'okay', 'cancel']
 frame = []
 
 # ------------------------------------------------------------------------------------------------

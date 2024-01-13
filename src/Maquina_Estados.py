@@ -361,7 +361,7 @@ class Mapeado(State):
                     prev_waypoint = False
 
                 # Gesto de Seguir (palma abierta)
-                elif ultimo_gesto == "stop":
+                elif ultimo_gesto == "palma":
                     # El robot sigue al humano con ese gesto (se hace en el callback)
                     #print("Seguir")
                     prev_waypoint = False
@@ -378,7 +378,7 @@ class Mapeado(State):
                     prev_waypoint = True   # asegurar que solo se entra la primera vez
 
                 # Gesto de Parar (puño)
-                elif ultimo_gesto == "stop":
+                elif ultimo_gesto == "puño":
                     # Parar el robot
                     #print("Parar robot")
                     cmd = Twist()
@@ -400,8 +400,8 @@ class Mapeado(State):
 
         ultimo_gesto = self.gestos_subscriber.get_ultimo_gesto()
 
-        # si el gesto es seguir muñeca y NO es parar: sigue al humano
-        if ultimo_gesto is not None and ultimo_gesto == "stop":
+        # si el gesto es seguir muñeca: sigue al humano
+        if ultimo_gesto is not None and ultimo_gesto == "palma":
 
             wrist_diff = msg.data[0]    # diferencia de posición respecto al centro
             area = msg.data[1]          # área del bounding box
