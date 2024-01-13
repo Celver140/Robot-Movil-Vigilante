@@ -1,0 +1,15 @@
+<launch>
+
+  <!-- Maquina de estados -->
+  <node name="maquina_estados" pkg="robot_movil_vigilante" 
+  type="Maquina_Estados.py" output="screen"/>
+
+  <!-- Interfaz -->
+  <node name="interfaz" pkg="robot_movil_vigilante" 
+  type="Interfaz.py" output="screen"/>
+
+  <!-- Rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_movil_vigilante)/single_robot.rviz" />
+  
+</launch>
+
