@@ -377,6 +377,16 @@ class Mapeado(State):
 
                     prev_waypoint = True   # asegurar que solo se entra la primera vez
 
+                # Gesto de Parar (puño)
+                elif ultimo_gesto == "stop":
+                    # Parar el robot
+                    #print("Parar robot")
+                    cmd = Twist()
+                    cmd.linear.x = 0.0
+                    cmd.angular.z = 0.0
+                    self.pub.publish(cmd)
+                    prev_waypoint = False
+
             rate.sleep()
 
         # Limpieza de los suscriptores:
